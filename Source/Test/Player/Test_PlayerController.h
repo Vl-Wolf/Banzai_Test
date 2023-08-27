@@ -29,6 +29,5 @@ protected:
 
 	void Jump();
 	void StopJump();
-
-	void Attack();
+	
 };

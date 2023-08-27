@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
-#include "Test_AbilitySystemComponent.h"
+#include "Test/Ability/AttackAbility.h"
+#include "Test/Ability/Test_AbilitySystemComponent.h"
 #include "TestCharacter.generated.h"
 
 
@@ -31,13 +32,23 @@ public:
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	virtual void InitDefaultAbility();
 
+	UPROPERTY(EditDefaultsOnly, Category="GameplayAbility")
+	TSubclassOf<UAttackAbility> DefaultAbility;
+	
 protected:
 		
 	// To add mapping context
-	virtual void BeginPlay();
+	virtual void BeginPlay() override;
+
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ability")
+	TArray<UAnimMontage*> AttackAnim;
 
 public:
+	
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/

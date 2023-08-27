@@ -2,7 +2,6 @@
 
 
 #include "Test_PlayerController.h"
-
 #include "GameFramework/Character.h"
 
 ATest_PlayerController::ATest_PlayerController()
@@ -21,8 +20,7 @@ void ATest_PlayerController::SetupInputComponent()
 
 	InputComponent->BindAction("Jump",IE_Pressed, this, &ATest_PlayerController::Jump);
 	InputComponent->BindAction("Jump",IE_Released, this, &ATest_PlayerController::StopJump);
-	InputComponent->BindAction("Attack",IE_Pressed, this, &ATest_PlayerController::Attack);
-	
+		
 }
 
 void ATest_PlayerController::MoveForward(float value)
@@ -79,8 +77,4 @@ void ATest_PlayerController::StopJump()
 			MyCharacter->StopJumping();
 		}
 	}
-}
-
-void ATest_PlayerController::Attack()
-{
 }

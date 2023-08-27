@@ -3,13 +3,10 @@
 #include "TestCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "Test_AbilitySystemComponent.h"
+#include "Test/Ability/Test_AbilitySystemComponent.h"
+#include "Test/Player/Test_PlayerController.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -56,9 +53,43 @@ UAbilitySystemComponent* ATestCharacter::GetAbilitySystemComponent() const
 	return  AbilitySystemComponent;
 }
 
+void ATestCharacter::InitDefaultAbility()
+{
+	if (DefaultAbility)
+	{
+		int32 InputID = static_cast<int32>(DefaultAbility.GetDefaultObject()->AbilityInputID);
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(DefaultAbility, 1, InputID, this));
+	}
+}
+
 void ATestCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	InitDefaultAbility();
 	
+}
+
+void ATestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	
+	APlayerController* MyPlayerController = Cast<APlayerController>(GetController());
+	if (MyPlayerController)
+	{
+		if (AbilitySystemComponent && InputComponent)
+		{
+			const FGameplayAbilityInputBinds InputBinds
+			(
+				"Confirm",
+				"Cancel",
+				"EGASAbilityInputID",
+				static_cast<int32>(EGASAbilityInputID::Confirm),
+				static_cast<int32>(EGASAbilityInputID::Cancel)
+			);
+
+			AbilitySystemComponent->BindAbilityActivationToInputComponent(InputComponent, InputBinds);
+		}	
+	}
 }
