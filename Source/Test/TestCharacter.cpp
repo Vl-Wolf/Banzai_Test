@@ -9,6 +9,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Test_AbilitySystemComponent.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -49,6 +50,25 @@ ATestCharacter::ATestCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	AbilitySystemComponent = CreateDefaultSubobject<UTest_AbilitySystemComponent>(TEXT("AbilitySystem"));
+}
+
+UAbilitySystemComponent* ATestCharacter::GetAbilitySystemComponent() const
+{
+	return  AbilitySystemComponent;
+}
+
+void ATestCharacter::InitAbilities()
+{
+	if (AbilitySystemComponent)
+	{
+		for (TSubclassOf<UTest_GameplayAbility>& Ability : DefaultAbilities)
+		{
+			const int32 InputID = static_cast<int32>(Ability.GetDefaultObject()->AbilityInputID);
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability, 1, InputID, this));
+		}
+	}
 }
 
 void ATestCharacter::BeginPlay()
@@ -72,8 +92,8 @@ void ATestCharacter::BeginPlay()
 void ATestCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
 		//Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
@@ -83,9 +103,20 @@ void ATestCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ATestCharacter::Look);
-
+		
 	}
 
+	if (AbilitySystemComponent && InputComponent)
+	{
+		const FGameplayAbilityInputBinds InputBinds(
+			"Confirm",
+			"Cancel",
+			"EGASAbilityInputID",
+			static_cast<int32>(EGASAbilityInputID::Confirm),
+			static_cast<int32>(EGASAbilityInputID::Cancel));
+
+		AbilitySystemComponent->BindAbilityActivationToInputComponent(InputComponent, InputBinds);
+	}
 }
 
 void ATestCharacter::Move(const FInputActionValue& Value)

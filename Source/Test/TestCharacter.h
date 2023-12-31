@@ -5,11 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "AbilitySystemInterface.h"
+#include "Test_AbilitySystemComponent.h"
+#include "Test_GameplayAbility.h"
 #include "TestCharacter.generated.h"
 
 
 UCLASS(config=Game)
-class ATestCharacter : public ACharacter
+class ATestCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -20,6 +23,9 @@ class ATestCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=AbilitySystem, meta = (AllowPrivateAccess = "true"))
+	class UTest_AbilitySystemComponent* AbilitySystemComponent;
 	
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -39,7 +45,13 @@ class ATestCharacter : public ACharacter
 
 public:
 	ATestCharacter();
-	
+
+	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	virtual void InitAbilities();
+
+	UPROPERTY(EditDefaultsOnly, Category="GameplayAbilities")
+	TArray<TSubclassOf<class UTest_GameplayAbility>> DefaultAbilities;
 
 protected:
 
@@ -48,9 +60,7 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-			
-
-protected:
+	
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
